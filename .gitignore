@@ -12,3 +12,5 @@ lfs.db
 *sitestatic/
 *media/
 *build/
+*dist/
+*_build/
