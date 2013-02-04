@@ -2,6 +2,8 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.backends.file import SessionStore
 
 # lfs imports
 from lfs.core.models import Country
@@ -11,6 +13,16 @@ from lfs.order.settings import PAYMENT_FAILED
 from lfs.order.settings import PAYMENT_FLAGGED
 from lfs.order.settings import SUBMITTED
 from lfs.payment.models import PaymentMethod
+from lfs.tests.utils import RequestFactory
+from lfs.order.utils import add_order
+from lfs.addresses.models import Address
+from lfs.payment.models import PaymentMethod
+from lfs.shipping.models import ShippingMethod
+from lfs.tax.models import Tax
+from lfs.customer.models import Customer
+from lfs.catalog.models import Product
+from lfs.cart.models import Cart
+from lfs.cart.models import CartItem
 
 # lfs_paypal imports
 from lfs_paypal.models import PayPalOrderTransaction
@@ -63,6 +75,100 @@ class PayPalPaymentTestCase(TestCase):
             "quantity": "1",
         }
 
+        session = SessionStore()
+        session.save()
+
+        rf = RequestFactory()
+        self.request = rf.get('/')
+        self.request.session = session
+        self.request.user = AnonymousUser()
+
+        tax = Tax.objects.create(rate=19)
+
+        shipping_method = ShippingMethod.objects.create(
+            name="Standard",
+            active=True,
+            price=1.0,
+            tax=tax
+        )
+
+        payment_method = PaymentMethod.objects.create(
+            name="Direct Debit",
+            active=True,
+            tax=tax,
+        )
+
+        us = Country.objects.get(code="us")
+        ie = Country.objects.get(code="ie")
+
+        address1 = Address.objects.create(
+            firstname="John",
+            lastname="Doe",
+            company_name="Doe Ltd.",
+            line1="Street 42",
+            city="Gotham City",
+            zip_code="2342",
+            country=ie,
+            phone="555-111111",
+            email="john@doe.com",
+        )
+
+        address2 = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            company_name="Doe Ltd.",
+            line1="bills house",
+            line2="bills street",
+            state="bills state",
+            city="Smallville",
+            zip_code="bills zip code",
+            country=us,
+            phone="666-111111",
+            email="jane@doe.com",
+        )
+
+        self.customer = Customer.objects.create(
+            session=session.session_key,
+            selected_shipping_method=shipping_method,
+            selected_payment_method=payment_method,
+            selected_shipping_address=address1,
+            selected_invoice_address=address2,
+        )
+
+        self.p1 = Product.objects.create(
+            name="Product 1",
+            slug="product-1",
+            sku="sku-1",
+            price=1.1,
+            tax=tax,
+            active=True,
+        )
+
+        self.p2 = Product.objects.create(
+            name="Product 2",
+            slug="product-2",
+            sku="sku-2",
+            price=2.2,
+            tax=tax,
+            active=True,
+        )
+
+        cart = Cart.objects.create(
+            session=session.session_key
+        )
+
+        item = CartItem.objects.create(
+            cart=cart,
+            product=self.p1,
+            amount=2,
+        )
+
+        item = CartItem.objects.create(
+            cart=cart,
+            product=self.p2,
+            amount=3,
+        )
+
     def test_successful_order_transaction_created(self):
         """Tests we have a transaction associated with an order after payment
         """
@@ -72,8 +178,8 @@ class PayPalPaymentTestCase(TestCase):
 
         PayPalIPN._postback = fake_postback
 
-        country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        order = add_order(self.request)
+        order.uuid = self.uuid
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -98,7 +204,8 @@ class PayPalPaymentTestCase(TestCase):
         PayPalIPN._postback = fake_postback
 
         country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        order = add_order(self.request)
+        order.uuid = self.uuid
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -125,7 +232,8 @@ class PayPalPaymentTestCase(TestCase):
 
         PayPalIPN._postback = fake_postback
         country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        order = add_order(self.request)
+        order.uuid = self.uuid
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -146,11 +254,8 @@ class PayPalPaymentTestCase(TestCase):
 
     def test_correct_address_fields_set_on_checkout(self):
         country = Country.objects.get(code="us")
-        order = Order(invoice_firstname="bill", invoice_lastname="blah",
-                      invoice_line1="bills house", invoice_line2="bills street",
-                      invoice_city="bills town", invoice_state="bills state",
-                      invoice_code="bills zip code", invoice_country=country,
-                      shipping_country=country, uuid=self.uuid)
+        order = add_order(self.request)
+        order.uuid = self.uuid
         self.assertEqual(order.state, SUBMITTED)
         order.payment_method = PaymentMethod.objects.get(pk=3)
         order.save()

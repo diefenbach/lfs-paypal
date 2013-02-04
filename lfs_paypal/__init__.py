@@ -39,6 +39,8 @@ class PayPalProcessor(PaymentMethodProcessor):
         conv = locale.localeconv()
         default_currency = conv['int_curr_symbol']
 
+        invoice_address = self.order.invoice_address
+
         info = {
             "cmd": "_xclick",
             "upload": "1",
@@ -46,13 +48,13 @@ class PayPalProcessor(PaymentMethodProcessor):
             "currency_code": default_currency,
             "notify_url": "http://" + current_site.domain + reverse('paypal-ipn'),
             "return": "http://" + current_site.domain + reverse('paypal-pdt'),
-            "first_name": self.order.invoice_firstname,
-            "last_name": self.order.invoice_lastname,
-            "address1": self.order.invoice_line1,
-            "address2": self.order.invoice_line2,
-            "city": self.order.invoice_city,
-            "state": self.order.invoice_state,
-            "zip": self.order.invoice_code,
+            "first_name": invoice_address.firstname,
+            "last_name": invoice_address.lastname,
+            "address1": invoice_address.line1,
+            "address2": invoice_address.line2,
+            "city": invoice_address.city,
+            "state": invoice_address.state,
+            "zip": invoice_address.zip_code,
             "no_shipping": "1",
             "custom": self.order.uuid,
             "invoice": self.order.uuid,
@@ -66,5 +68,4 @@ class PayPalProcessor(PaymentMethodProcessor):
             url = SANDBOX_POSTBACK_ENDPOINT + "?" + parameters
         else:
             url = POSTBACK_ENDPOINT + "?" + parameters
-
         return url
