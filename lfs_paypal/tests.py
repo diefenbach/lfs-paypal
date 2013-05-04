@@ -1,9 +1,12 @@
+from copy import deepcopy
+
 # django imports
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 # lfs imports
+from lfs.addresses.models import Address
 from lfs.core.models import Country
 from lfs.order.models import Order
 from lfs.order.settings import PAID
@@ -71,9 +74,27 @@ class PayPalPaymentTestCase(TestCase):
             return 'VERIFIED'
 
         PayPalIPN._postback = fake_postback
-
         country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        shipping_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        invoice_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+
+        order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -96,9 +117,27 @@ class PayPalPaymentTestCase(TestCase):
             return 'INVALID'
 
         PayPalIPN._postback = fake_postback
-
         country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        shipping_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        invoice_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
+
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -122,10 +161,27 @@ class PayPalPaymentTestCase(TestCase):
         def fake_postback(self, test=True):
             """Perform a Fake PayPal IPN Postback request."""
             return 'VERIFIED'
-
         PayPalIPN._postback = fake_postback
         country = Country.objects.get(code="ie")
-        order = Order(invoice_country=country, shipping_country=country, uuid=self.uuid)
+        shipping_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        invoice_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
         order.save()
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
@@ -146,13 +202,32 @@ class PayPalPaymentTestCase(TestCase):
 
     def test_correct_address_fields_set_on_checkout(self):
         country = Country.objects.get(code="us")
-        order = Order(invoice_firstname="bill", invoice_lastname="blah",
-                      invoice_line1="bills house", invoice_line2="bills street",
-                      invoice_city="bills town", invoice_state="bills state",
-                      invoice_code="bills zip code", invoice_country=country,
-                      shipping_country=country, uuid=self.uuid)
+        shipping_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        invoice_address = Address.objects.create(
+            firstname="bill",
+            lastname="blah",
+            line1="bills house",
+            line2="bills street",
+            city="bills town",
+            state="bills state",
+            zip_code="bills zip code",
+            country=country)
+        order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
-        order.payment_method = PaymentMethod.objects.get(pk=3)
+        pm = PaymentMethod.objects.create(
+            active = True,
+            module = "lfs_paypal.PayPalProcessor",
+        )
+
+        order.payment_method = pm
         order.save()
         url = order.get_pay_link(None)
 
