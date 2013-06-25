@@ -20,11 +20,14 @@ from paypal.standard.ipn.signals import payment_was_successful, payment_was_flag
 from paypal.standard.pdt.signals import pdt_failed, pdt_successful
 from paypal.standard.models import ST_PP_COMPLETED
 
+# load logger
+logger = logging.getLogger("default")
+
 
 def mark_payment(pp_obj, order_state=PAID):
     order = None
     try:
-        logging.info("PayPal: getting order for uuid %s" % pp_obj.custom)
+        logger.info("PayPal: getting order for uuid %s" % pp_obj.custom)
         order_uuid = pp_obj.custom
         order = Order.objects.get(uuid=order_uuid)
         if order is not None:
@@ -36,12 +39,12 @@ def mark_payment(pp_obj, order_state=PAID):
             order.state = order_state
             order.save()
     except Order.DoesNotExist, e:
-        logging.error(e)
+        logger.error(e)
     return order
 
 
 def successful_payment(sender, **kwargs):
-    logging.info("PayPal: successful ipn payment")
+    logger.info("PayPal: successful ipn payment")
     ipn_obj = sender
     order = mark_payment(ipn_obj, PAID)
     if order is not None:
@@ -49,11 +52,11 @@ def successful_payment(sender, **kwargs):
         transaction.ipn.add(ipn_obj)
         transaction.save()
     else:
-        logging.warning("PayPal: successful ipn payment, no order found for uuid %s" % ipn_obj.custom)
+        logger.warning("PayPal: successful ipn payment, no order found for uuid %s" % ipn_obj.custom)
 
 
 def unsuccessful_payment(sender, **kwargs):
-    logging.info("PayPal: unsuccessful ipn payment")
+    logger.info("PayPal: unsuccessful ipn payment")
     ipn_obj = sender
     if ipn_obj:
         order = None
@@ -66,19 +69,19 @@ def unsuccessful_payment(sender, **kwargs):
             transaction.ipn.add(ipn_obj)
             transaction.save()
         else:
-            logging.warning("PayPal: unsuccessful ipn payment, no order found for uuid %s" % ipn_obj.custom)
+            logger.warning("PayPal: unsuccessful ipn payment, no order found for uuid %s" % ipn_obj.custom)
     else:
-        logging.warning("PayPal: unsuccessful ipn payment signal with no ipn object")
+        logger.warning("PayPal: unsuccessful ipn payment signal with no ipn object")
 
 
 def successful_pdt(sender, **kwargs):
-    logging.info("PayPal: successful pdt payment")
+    logger.info("PayPal: successful pdt payment")
     pdt_obj = sender
     mark_payment(pdt_obj, True)
 
 
 def unsuccesful_pdt(sender, **kwargs):
-    logging.info("PayPal: unsuccessful pdt payment")
+    logger.info("PayPal: unsuccessful pdt payment")
     pdt_obj = sender
     mark_payment(pdt_obj, False)
 
