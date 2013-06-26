@@ -31,15 +31,15 @@ def mark_payment(pp_obj, order_state=PAID):
         order_uuid = pp_obj.custom
         order = Order.objects.get(uuid=order_uuid)
         if order is not None:
-            if order.state != PAID and order_state == PAID:
-                lfs.core.signals.order_paid.send({"order": order})
-                # TODO: Why is here an order received mail sent?
-                if getattr(settings, 'LFS_SEND_ORDER_MAIL_ON_PAYMENT', False):
-                    mail_utils.send_order_received_mail(order)
+            order_old_state = order.state
             order.state = order_state
             order.save()
+            if order_old_state != PAID and order_state == PAID:
+                lfs.core.signals.order_paid.send({"order": order})
+                if getattr(settings, 'LFS_SEND_ORDER_MAIL_ON_PAYMENT', False):
+                    mail_utils.send_order_received_mail(order)
     except Order.DoesNotExist, e:
-        logger.error(e)
+        logger.error("PayPal: %s" % e)
     return order
 
 
@@ -61,8 +61,10 @@ def unsuccessful_payment(sender, **kwargs):
     if ipn_obj:
         order = None
         if ipn_obj.payment_status == ST_PP_COMPLETED:
+            logger.info("PayPal: payment flaged")
             order = mark_payment(ipn_obj, PAYMENT_FLAGGED)
         else:
+            logger.info("PayPal: payment failed")
             order = mark_payment(ipn_obj, PAYMENT_FAILED)
         if order is not None:
             transaction, created = PayPalOrderTransaction.objects.get_or_create(order=order)
