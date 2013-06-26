@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 # django imports
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -223,8 +221,8 @@ class PayPalPaymentTestCase(TestCase):
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
         pm = PaymentMethod.objects.create(
-            active = True,
-            module = "lfs_paypal.PayPalProcessor",
+            active=True,
+            module="lfs_paypal.PayPalProcessor",
         )
 
         order.payment_method = pm
