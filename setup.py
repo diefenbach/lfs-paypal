@@ -27,7 +27,7 @@ setup(name='lfs-paypal',
       zip_safe=False,
       dependency_links=["http://pypi.iqpp.de/"],
       install_requires=[
-        'setuptools',
-        'django-paypal'
+          'setuptools',
+          'django-paypal'
       ],
       )
