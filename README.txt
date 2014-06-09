@@ -6,7 +6,7 @@ lfs_paypal is the integration of PayPal into LFS.
 1.1 (2014-06-08)
 ================
 
-* Add Django 1.6 suppport
+* Adds Django 1.6 suppport
 
 1.0
 ===
