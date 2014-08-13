@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.0b1'
+version = 'dev'
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.txt')).read()
@@ -27,7 +27,6 @@ setup(name='lfs-paypal',
       zip_safe=False,
       dependency_links=["http://pypi.iqpp.de/"],
       install_requires=[
-        'setuptools',
-        'django-paypal'
+          'setuptools',
       ],
       )
