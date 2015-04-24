@@ -9,7 +9,7 @@ from paypal.standard.ipn.models import PayPalIPN
 
 
 class PayPalOrderTransaction(models.Model):
-    order = models.ForeignKey(Order, unique=True)
+    order = models.OneToOneField(Order)
     ipn = models.ManyToManyField(PayPalIPN)
 
     class Meta:
