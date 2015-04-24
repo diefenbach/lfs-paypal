@@ -12,10 +12,6 @@ class PayPalOrderTransaction(models.Model):
     order = models.OneToOneField(Order)
     ipn = models.ManyToManyField(PayPalIPN)
 
-    class Meta:
-        app_label = "payment"  # No migration needed after factored out
-
-
 # See https://bitbucket.org/diefenbach/django-lfs/issue/197/
 from paypal.standard.ipn.views import ipn
 ipn.csrf_exempt = True
