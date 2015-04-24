@@ -4,6 +4,11 @@ What is it?
 lfs_paypal is the integration of PayPal into `LFS`_. `LFS`_ is an online shop
 based on Django.
 
+1.2.1 (2015-04-24)
+==================
+
+* Fixes tests.
+
 1.2 (2014-06-11)
 ================
 
