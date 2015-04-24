@@ -80,7 +80,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         invoice_address = Address.objects.create(
             firstname="bill",
@@ -89,7 +89,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
 
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
@@ -123,7 +123,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         invoice_address = Address.objects.create(
             firstname="bill",
@@ -132,7 +132,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
 
@@ -168,7 +168,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         invoice_address = Address.objects.create(
             firstname="bill",
@@ -177,7 +177,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
@@ -207,7 +207,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         invoice_address = Address.objects.create(
             firstname="bill",
@@ -216,7 +216,7 @@ class PayPalPaymentTestCase(TestCase):
             line2="bills street",
             city="bills town",
             state="bills state",
-            zip_code="bills zip code",
+            zip_code="bills zip",
             country=country)
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
@@ -238,4 +238,4 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual('address1=bills house' in url, True)
         self.assertEqual('address2=bills street' in url, True)
         self.assertEqual('state=bills state' in url, True)
-        self.assertEqual('zip=bills zip code' in url, True)
+        self.assertEqual('zip=bills zip' in url, True)
