@@ -21,7 +21,7 @@ from paypal.standard.pdt.signals import pdt_failed, pdt_successful
 from paypal.standard.models import ST_PP_COMPLETED
 
 # load logger
-logger = logging.getLogger("default")
+logger = logging.getLogger(__name__)
 
 
 def mark_payment(pp_obj, order_state=PAID):
