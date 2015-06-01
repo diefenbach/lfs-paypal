@@ -40,7 +40,7 @@ class PayPalProcessor(PaymentMethodProcessor):
         default_currency = conv['int_curr_symbol']
 
         protocol = 'http'
-        if self.request.is_secure():
+        if self.request and self.request.is_secure():
             protocol = 'https'
 
         info = {

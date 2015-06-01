@@ -37,7 +37,7 @@ def mark_payment(pp_obj, order_state=PAID):
             if order_old_state != PAID and order_state == PAID:
                 lfs.core.signals.order_paid.send(sender=order)
                 if getattr(settings, 'LFS_SEND_ORDER_MAIL_ON_PAYMENT', False):
-                    mail_utils.send_order_received_mail(order)
+                    mail_utils.send_order_received_mail(None, order)
     except Order.DoesNotExist, e:
         logger.error("PayPal: %s" % e)
     return order
