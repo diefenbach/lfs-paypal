@@ -7,7 +7,6 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ipn', '__first__'),
         ('order', '0001_initial'),
     ]
 
