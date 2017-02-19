@@ -16,8 +16,7 @@ from lfs.mail import utils as mail_utils
 from lfs_paypal.models import PayPalOrderTransaction
 
 # django-paypal imports
-from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
-from paypal.standard.pdt.signals import pdt_failed, pdt_successful
+from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received
 from paypal.standard.models import ST_PP_COMPLETED
 
 # load logger
@@ -87,8 +86,5 @@ def unsuccesful_pdt(sender, **kwargs):
     pdt_obj = sender
     mark_payment(pdt_obj, False)
 
-
-payment_was_successful.connect(successful_payment, dispatch_uid="Order.ipn_successful")
-payment_was_flagged.connect(unsuccessful_payment, dispatch_uid="Order.ipn_unsuccessful")
-pdt_successful.connect(successful_pdt, dispatch_uid="Order.pdt_successful")
-pdt_failed.connect(unsuccesful_pdt, dispatch_uid="Order.pdt_unsuccessful")
+valid_ipn_received.connect(successful_payment, dispatch_uid="Order.ipn_successful")
+invalid_ipn_received.connect(unsuccessful_payment, dispatch_uid="Order.ipn_unsuccessful")

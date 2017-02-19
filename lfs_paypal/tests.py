@@ -1,3 +1,5 @@
+from urllib import urlencode
+
 # django imports
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -98,7 +100,7 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 0)
         post_params = self.IPN_POST_PARAMS
-        response = self.client.post(reverse('paypal-ipn'), post_params)
+        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
@@ -143,7 +145,7 @@ class PayPalPaymentTestCase(TestCase):
         post_params = self.IPN_POST_PARAMS
         payment_status_update = {"payment_status": ST_PP_DENIED}
         post_params.update(payment_status_update)
-        response = self.client.post(reverse('paypal-ipn'), post_params)
+        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
@@ -187,7 +189,7 @@ class PayPalPaymentTestCase(TestCase):
         post_params = self.IPN_POST_PARAMS
         incorrect_receiver_email_update = {"receiver_email": "incorrect_email@someotherbusiness.com"}
         post_params.update(incorrect_receiver_email_update)
-        response = self.client.post(reverse('paypal-ipn'), post_params)
+        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
@@ -222,7 +224,7 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual(order.state, SUBMITTED)
         pm = PaymentMethod.objects.create(
             active=True,
-            module="lfs_paypal.PayPalProcessor",
+            module="lfs_paypal.processor.PayPalProcessor",
         )
 
         order.payment_method = pm
