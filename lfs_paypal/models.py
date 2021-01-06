@@ -9,5 +9,5 @@ from paypal.standard.ipn.models import PayPalIPN
 
 
 class PayPalOrderTransaction(models.Model):
-    order = models.OneToOneField(Order)
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
     ipn = models.ManyToManyField(PayPalIPN)
