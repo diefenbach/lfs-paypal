@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('ipn', models.ManyToManyField(to='ipn.PayPalIPN')),
-                ('order', models.OneToOneField(to='order.Order')),
+                ('order', models.OneToOneField(to='order.Order', on_delete=models.CASCADE)),
             ],
         ),
     ]
