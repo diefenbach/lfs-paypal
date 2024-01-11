@@ -37,19 +37,19 @@ class PayPalProcessor(PaymentMethodProcessor):
         shop = lfs_get_object_or_404(Shop, pk=1)
         current_site = Site.objects.get(id=settings.SITE_ID)
         conv = locale.localeconv()
-        default_currency = conv['int_curr_symbol']
+        default_currency = conv["int_curr_symbol"]
 
-        protocol = 'http'
+        protocol = "http"
         if self.request and self.request.is_secure():
-            protocol = 'https'
+            protocol = "https"
 
         info = {
             "cmd": "_xclick",
             "upload": "1",
             "business": settings.PAYPAL_RECEIVER_EMAIL,
             "currency_code": default_currency,
-            "notify_url": "{0}://{1}{2}".format(protocol, current_site.domain, reverse('paypal-ipn')),
-            "return": "{0}://{1}{2}".format(protocol, current_site.domain, reverse('lfs_thank_you')),
+            "notify_url": "{0}://{1}{2}".format(protocol, current_site.domain, reverse("paypal-ipn")),
+            "return": "{0}://{1}{2}".format(protocol, current_site.domain, reverse("lfs_thank_you")),
             "first_name": self.order.invoice_address.firstname,
             "last_name": self.order.invoice_address.lastname,
             "address1": self.order.invoice_address.line1,
@@ -66,7 +66,7 @@ class PayPalProcessor(PaymentMethodProcessor):
         }
 
         parameters = "&".join(["%s=%s" % (k, v) for (k, v) in info.items()])
-        if getattr(settings, 'PAYPAL_TEST', settings.DEBUG):
+        if getattr(settings, "PAYPAL_TEST", settings.DEBUG):
             url = SANDBOX_POSTBACK_ENDPOINT + "?" + parameters
         else:
             url = POSTBACK_ENDPOINT + "?" + parameters

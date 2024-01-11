@@ -35,7 +35,7 @@ def mark_payment(pp_obj, order_state=PAID):
             order.save()
             if order_old_state != PAID and order_state == PAID:
                 lfs.core.signals.order_paid.send(sender=order)
-                if getattr(settings, 'LFS_SEND_ORDER_MAIL_ON_PAYMENT', False):
+                if getattr(settings, "LFS_SEND_ORDER_MAIL_ON_PAYMENT", False):
                     mail_utils.send_order_received_mail(None, order)
     except Order.DoesNotExist as e:
         logger.error("PayPal: %s" % e)
@@ -85,6 +85,7 @@ def unsuccesful_pdt(sender, **kwargs):
     logger.info("PayPal: unsuccessful pdt payment")
     pdt_obj = sender
     mark_payment(pdt_obj, False)
+
 
 valid_ipn_received.connect(successful_payment, dispatch_uid="Order.ipn_successful")
 invalid_ipn_received.connect(unsuccessful_payment, dispatch_uid="Order.ipn_unsuccessful")

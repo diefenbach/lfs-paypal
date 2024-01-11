@@ -24,12 +24,11 @@ from paypal.standard.models import ST_PP_COMPLETED, ST_PP_DENIED
 
 
 class PayPalPaymentTestCase(TestCase):
-    """Tests paypal payments
-    """
-    fixtures = ['lfs_shop.xml']
+    """Tests paypal payments"""
+
+    fixtures = ["lfs_shop.xml"]
 
     def setUp(self):
-
         self.uuid = "981242b5-fb0c-4563-bccb-e03033673d2a"
         self.IPN_POST_PARAMS = {
             "protection_eligibility": "Ineligible",
@@ -67,11 +66,11 @@ class PayPalPaymentTestCase(TestCase):
         }
 
     def test_successful_order_transaction_created(self):
-        """Tests we have a transaction associated with an order after payment
-        """
+        """Tests we have a transaction associated with an order after payment"""
+
         def fake_postback(self, test=True):
             """Perform a Fake PayPal IPN Postback request."""
-            return 'VERIFIED'
+            return "VERIFIED"
 
         PayPalIPN._postback = fake_postback
         country = Country.objects.get(code="ie")
@@ -83,7 +82,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         invoice_address = Address.objects.create(
             firstname="bill",
             lastname="blah",
@@ -92,7 +92,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
 
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
@@ -100,7 +101,9 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual(len(PayPalIPN.objects.all()), 0)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 0)
         post_params = self.IPN_POST_PARAMS
-        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(
+            reverse("paypal-ipn"), urlencode(post_params), content_type="application/x-www-form-urlencoded"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
@@ -110,11 +113,11 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual(order.state, PAID)
 
     def test_failed_order_transaction_created(self):
-        """Tests a failed paypal transaction
-        """
+        """Tests a failed paypal transaction"""
+
         def fake_postback(self, test=True):
             """Perform a Fake PayPal IPN Postback request."""
-            return 'INVALID'
+            return "INVALID"
 
         PayPalIPN._postback = fake_postback
         country = Country.objects.get(code="ie")
@@ -126,7 +129,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         invoice_address = Address.objects.create(
             firstname="bill",
             lastname="blah",
@@ -135,7 +139,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
 
         self.assertEqual(order.state, SUBMITTED)
@@ -145,7 +150,9 @@ class PayPalPaymentTestCase(TestCase):
         post_params = self.IPN_POST_PARAMS
         payment_status_update = {"payment_status": ST_PP_DENIED}
         post_params.update(payment_status_update)
-        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(
+            reverse("paypal-ipn"), urlencode(post_params), content_type="application/x-www-form-urlencoded"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
@@ -156,11 +163,12 @@ class PayPalPaymentTestCase(TestCase):
         self.assertEqual(order.state, PAYMENT_FAILED)
 
     def test_succesful_order_with_flagged_payment_invalid_receiver_email(self):
-        """Tests a succesful paypal transaction that is flagged with an invalide receiver email
-        """
+        """Tests a succesful paypal transaction that is flagged with an invalide receiver email"""
+
         def fake_postback(self, test=True):
             """Perform a Fake PayPal IPN Postback request."""
-            return 'VERIFIED'
+            return "VERIFIED"
+
         PayPalIPN._postback = fake_postback
         country = Country.objects.get(code="ie")
         shipping_address = Address.objects.create(
@@ -171,7 +179,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         invoice_address = Address.objects.create(
             firstname="bill",
             lastname="blah",
@@ -180,7 +189,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
         order.save()
@@ -189,14 +199,16 @@ class PayPalPaymentTestCase(TestCase):
         post_params = self.IPN_POST_PARAMS
         incorrect_receiver_email_update = {"receiver_email": "incorrect_email@someotherbusiness.com"}
         post_params.update(incorrect_receiver_email_update)
-        response = self.client.post(reverse('paypal-ipn'), urlencode(post_params), content_type="application/x-www-form-urlencoded")
+        response = self.client.post(
+            reverse("paypal-ipn"), urlencode(post_params), content_type="application/x-www-form-urlencoded"
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(PayPalIPN.objects.all()), 1)
         self.assertEqual(len(PayPalOrderTransaction.objects.all()), 1)
         ipn_obj = PayPalIPN.objects.all()[0]
         self.assertEqual(ipn_obj.payment_status, ST_PP_COMPLETED)
         self.assertEqual(ipn_obj.flag, True)
-        self.assertEqual(ipn_obj.flag_info, u'Invalid receiver_email. (incorrect_email@someotherbusiness.com)')
+        self.assertEqual(ipn_obj.flag_info, "Invalid receiver_email. (incorrect_email@someotherbusiness.com)")
         order = Order.objects.all()[0]
         self.assertEqual(order.state, PAYMENT_FLAGGED)
 
@@ -210,7 +222,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         invoice_address = Address.objects.create(
             firstname="bill",
             lastname="blah",
@@ -219,7 +232,8 @@ class PayPalPaymentTestCase(TestCase):
             city="bills town",
             state="bills state",
             zip_code="bills zip",
-            country=country)
+            country=country,
+        )
         order = Order(invoice_address=invoice_address, shipping_address=shipping_address, uuid=self.uuid)
         self.assertEqual(order.state, SUBMITTED)
         pm = PaymentMethod.objects.create(
@@ -232,12 +246,12 @@ class PayPalPaymentTestCase(TestCase):
         url = order.get_pay_link(None)
 
         # test unique id
-        self.assertEqual(('custom=' + self.uuid) in url, True)
+        self.assertEqual(("custom=" + self.uuid) in url, True)
 
         # test address stuff
-        self.assertEqual('first_name=bill' in url, True)
-        self.assertEqual('last_name=blah' in url, True)
-        self.assertEqual('address1=bills house' in url, True)
-        self.assertEqual('address2=bills street' in url, True)
-        self.assertEqual('state=bills state' in url, True)
-        self.assertEqual('zip=bills zip' in url, True)
+        self.assertEqual("first_name=bill" in url, True)
+        self.assertEqual("last_name=blah" in url, True)
+        self.assertEqual("address1=bills house" in url, True)
+        self.assertEqual("address2=bills street" in url, True)
+        self.assertEqual("state=bills state" in url, True)
+        self.assertEqual("zip=bills zip" in url, True)

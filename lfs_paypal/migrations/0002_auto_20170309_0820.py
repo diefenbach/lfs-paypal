@@ -14,9 +14,8 @@ def update_price_calculator(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('lfs_paypal', '0001_initial'),
+        ("lfs_paypal", "0001_initial"),
     ]
 
     operations = [
