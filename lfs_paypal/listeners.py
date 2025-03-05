@@ -20,7 +20,7 @@ from paypal.standard.ipn.signals import valid_ipn_received, invalid_ipn_received
 from paypal.standard.models import ST_PP_COMPLETED
 
 # load logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("lfs")
 
 
 def mark_payment(pp_obj, order_state=PAID):
