@@ -1,5 +1,4 @@
 # python imports
-import locale
 
 # lfs imports
 from lfs.plugins import PaymentMethodProcessor
@@ -36,8 +35,7 @@ class PayPalProcessor(PaymentMethodProcessor):
     def get_pay_link(self):
         shop = lfs_get_object_or_404(Shop, pk=1)
         current_site = Site.objects.get(id=settings.SITE_ID)
-        conv = locale.localeconv()
-        default_currency = conv["int_curr_symbol"]
+        default_currency = settings.LFS_CURRENCY
 
         protocol = "http"
         if self.request and self.request.is_secure():
