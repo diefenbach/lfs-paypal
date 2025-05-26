@@ -1,0 +1,7 @@
+{% extends "lfs/base.html" %}
+
+{% block content %}
+    <h1>Es ist ein Fehler aufgetreten</h1>
+    <p>Bei der Verarbeitung Ihrer Zahlung ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.</p>
+    <p><a href="{% url 'lfs_checkout' %}" class="btn">Zurück zur Kasse</a></p>
+{% endblock %}
