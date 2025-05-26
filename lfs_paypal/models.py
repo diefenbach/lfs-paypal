@@ -30,6 +30,7 @@ class PayPalPaymentEntry(models.Model):
     STATUS_CHOICES = [
         (PENDING, "Pending"),
         (COMPLETED, "Completed"),
+        (APPROVED, "Approved"),
         (FAILED, "Failed"),
         (CANCELLED, "Cancelled"),
     ]
