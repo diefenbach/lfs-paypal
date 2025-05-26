@@ -5,12 +5,17 @@ from .models import PayPalPayment, PayPalPaymentEntry
 class PayPalPaymentEntryInline(admin.TabularInline):
     model = PayPalPaymentEntry
     extra = 0
-    fields = ("status", "created_at")
-    readonly_fields = ("status", "created_at")
+    fields = ("status", "created_at_with_seconds")
+    readonly_fields = ("status", "created_at_with_seconds")
     can_delete = False
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    def created_at_with_seconds(self, obj):
+        return obj.created_at.strftime("%d.%m.%Y %H:%M:%S")
+
+    created_at_with_seconds.short_description = "Created At"
 
 
 @admin.register(PayPalPayment)
