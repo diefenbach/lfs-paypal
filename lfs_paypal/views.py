@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 import requests
-
+from lfs.cart import utils as cart_utils
 from lfs.core.signals import order_paid, order_submitted
 from lfs.mail import utils as mail_utils
 from lfs.order.settings import PAID
@@ -50,10 +50,16 @@ def capture_payment(request):
     response = requests.post(capture_url, headers=headers, json={})
 
     if response.status_code == 201:
+        # For any reasons paypal calls this view two times
+        cart = cart_utils.get_cart(request)
+        if cart is None:
+            return redirect(reverse("lfs_thank_you"))
+
         capture_response = response.json()
         if capture_response["status"] == "COMPLETED":
-            # Create order
+            logger.info(f"Creating order for payment {token}")
             order = add_order(request)
+            logger.info(f"Order created: {order.id}")
             order.state = PAID
             order.save()
 
