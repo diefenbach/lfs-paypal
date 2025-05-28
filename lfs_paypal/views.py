@@ -9,7 +9,6 @@ from django.views.decorators.csrf import csrf_exempt
 import requests
 from lfs.cart import utils as cart_utils
 from lfs.core.signals import order_paid, order_submitted
-from lfs.mail import utils as mail_utils
 from lfs.order.settings import PAID
 from lfs.order.utils import add_order
 from lfs_paypal.models import PayPalPayment, PayPalPaymentEntry
@@ -66,9 +65,6 @@ def capture_payment(request):
             # Notify the system
             order_submitted.send(sender=order, request=request)
             order_paid.send(sender=order, request=request)
-
-            # Notify about the received payment
-            mail_utils.send_order_received_mail(None, order)
 
             # Save payment info to database
             paypal_payment.order = order
