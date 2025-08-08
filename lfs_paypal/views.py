@@ -20,8 +20,11 @@ logger = logging.getLogger("lfs.paypal")
 @csrf_exempt
 def capture_payment(request):
     """
-    Capture the PayPal payment after user approval using v2 API.
-    This is where PayPal redirects after the user approves the payment.
+    Capture the PayPal payment after user approval using v2 API. This is where PayPal redirects after the user
+    approves the payment.
+
+    The url vor this view is passed in the return_url parameter of the order creation request, see processor.py
+    -> application_context
     """
     token = request.GET.get("token")
 
