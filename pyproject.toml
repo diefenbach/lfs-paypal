@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77,<81"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lfs-paypal"
+dynamic = ["version"]
+description = "Integration of PayPal into LFS"
+readme = "README.txt"
+license = "BSD-3-Clause"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "Kai Diefenbach" }]
+keywords = ["django", "e-commerce", "online-shop", "paypal"]
+classifiers = [
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 5.2",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.12"
+# Installed by django-lfs, which it imports; it does not list django-lfs to avoid a cycle.
+dependencies = [
+    "Django>=5.2,<6",
+    "requests>=2.32,<3",
+]
+
+[project.urls]
+Source = "https://github.com/diefenbach/lfs-paypal"
+
+[tool.setuptools.packages.find]
+include = ["lfs_paypal*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "lfs_paypal.__version__" }
