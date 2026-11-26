@@ -1,2 +1,2 @@
-__version__ = "1.4.1"
+__version__ = "2.0.0"
 default_app_config = "lfs_paypal.apps.LfsPayPalAppConfig"
